@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     Format: [{"question": "...", "rationale": "..."}]`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-3-haiku-20240307",
+     model: "claude-3-5-haiku-latest",
       max_tokens: 1500,
       temperature: 0.7,
       system: "You output only valid, pristine JSON arrays. No markdown, no preambles.",
