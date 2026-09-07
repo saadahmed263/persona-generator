@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 
-const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const anthropic = new Anthropic({
+  apiKey: process.env.ANTHROPIC_API_KEY,
+});
 
 export async function POST(req: Request) {
   try {
@@ -36,8 +38,9 @@ export async function POST(req: Request) {
     Return ONLY a valid JSON array. Do NOT wrap it in markdown. Do NOT add conversational text. Ensure all quotation marks inside your text are properly escaped. 
     Format: [{"question": "...", "rationale": "..."}]`;
 
+    // Testing claude-3-5-sonnet-latest
     const msg = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: "claude-3-5-sonnet-latest",
       max_tokens: 1500,
       temperature: 0.7,
       system: "You output only valid, pristine JSON arrays. No markdown, no preambles.",
@@ -46,9 +49,7 @@ export async function POST(req: Request) {
 
     const rawContent = msg.content[0].type === "text" ? msg.content[0].text : "[]";
     
-    // BULLETPROOF JSON EXTRACTION
     let cleanJson = rawContent;
-    // Find the first '[' and the last ']' to extract just the array
     const jsonMatch = rawContent.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
       cleanJson = jsonMatch[0];
@@ -58,7 +59,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ questions });
   } catch (error: any) {
-    console.error("🚨 QUESTION API ERROR:", error?.message || error);
-    return NextResponse.json({ error: "Failed to generate questions" }, { status: 500 });
+    console.error("🚨 DETAILED ERROR DUMP:", JSON.stringify({
+      status: error?.status,
+      message: error?.message,
+      errorBody: error?.error,
+      keyPrefix: process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.slice(0, 7) + "..." : "MISSING"
+    }, null, 2));
+    return NextResponse.json({ error: error?.message || "Failed to generate questions" }, { status: 500 });
   }
 }
