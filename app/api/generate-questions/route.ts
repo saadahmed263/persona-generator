@@ -36,12 +36,12 @@ export async function POST(req: Request) {
     Return ONLY a valid JSON array. Do NOT wrap it in markdown. Do NOT add conversational text. Ensure all quotation marks inside your text are properly escaped. 
     Format: [{"question": "...", "rationale": "..."}]`;
 
-const msg = await anthropic.messages.create({
-  model: "claude-3-5-sonnet-20241022",
-  max_tokens: 1500,
-  temperature: 0.7,
-  // ...
-});
+    const msg = await anthropic.messages.create({
+      model: "claude-3-5-sonnet-20241022",
+      max_tokens: 1500,
+      temperature: 0.7,
+      system: "You output only valid, pristine JSON arrays. No markdown, no preambles.",
+      messages: [{ role: "user", content: systemPrompt }],
     });
 
     const rawContent = msg.content[0].type === "text" ? msg.content[0].text : "[]";
