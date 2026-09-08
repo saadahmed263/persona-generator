@@ -38,9 +38,8 @@ export async function POST(req: Request) {
     Return ONLY a valid JSON array. Do NOT wrap it in markdown. Do NOT add conversational text. Ensure all quotation marks inside your text are properly escaped. 
     Format: [{"question": "...", "rationale": "..."}]`;
 
-    // Testing claude-3-5-sonnet-latest
     const msg = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-latest",
+      model: "claude-3-5-sonnet-20240620",
       max_tokens: 1500,
       temperature: 0.7,
       system: "You output only valid, pristine JSON arrays. No markdown, no preambles.",
@@ -63,7 +62,6 @@ export async function POST(req: Request) {
       status: error?.status,
       message: error?.message,
       errorBody: error?.error,
-      keyPrefix: process.env.ANTHROPIC_API_KEY ? process.env.ANTHROPIC_API_KEY.slice(0, 7) + "..." : "MISSING"
     }, null, 2));
     return NextResponse.json({ error: error?.message || "Failed to generate questions" }, { status: 500 });
   }
