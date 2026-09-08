@@ -39,15 +39,15 @@ export async function POST(req: Request) {
     Format: [{"question": "...", "rationale": "..."}]`;
 
     const msg = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20240620",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
-      temperature: 0.7,
       system: "You output only valid, pristine JSON arrays. No markdown, no preambles.",
       messages: [{ role: "user", content: systemPrompt }],
     });
 
     const rawContent = msg.content[0].type === "text" ? msg.content[0].text : "[]";
     
+    // BULLETPROOF JSON EXTRACTION
     let cleanJson = rawContent;
     const jsonMatch = rawContent.match(/\[[\s\S]*\]/);
     if (jsonMatch) {
@@ -58,11 +58,7 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ questions });
   } catch (error: any) {
-    console.error("🚨 DETAILED ERROR DUMP:", JSON.stringify({
-      status: error?.status,
-      message: error?.message,
-      errorBody: error?.error,
-    }, null, 2));
+    console.error("🚨 QUESTION API ERROR:", error?.message || error);
     return NextResponse.json({ error: error?.message || "Failed to generate questions" }, { status: 500 });
   }
 }
